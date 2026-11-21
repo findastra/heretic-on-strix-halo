@@ -49,7 +49,7 @@ Everything lives in `%USERPROFILE%\AstraWisp`, in a normal user account with no 
 ## Errors and fixes
 
 1. **Python's normal installer failed** (python.org 3.12.10 .exe, per-user, quiet): exit code 3, MSI error 0x80070003 "path not found" when Windows Installer opened its cached `core.msi`. Likely caused by the sandbox the installing shell ran in. **Fix:** used Python's official NuGet package instead, which is a plain folder and needs no installer.
-2. **Driver older than AMD asks for.** AMD's page says ROCm 7.2.1 PyTorch on Windows needs graphics driver 26.2.2; the box has Adrenalin 25.20. PyTorch works on it anyway. The llama.cpp ROCm build finds no device, which may be this. Being updated afterwards to Adrenalin 26.11.2 (see the README).
+2. **Driver older than AMD asks for.** AMD's page says ROCm 7.2.1 PyTorch on Windows needs graphics driver 26.2.2; the box has Adrenalin 25.20. PyTorch works on it anyway. The llama.cpp ROCm build finds no device, which may be this. Updated afterwards to Adrenalin 26.11.2; see the re-test below.
 
 3. **Heretic crashed at its menus when run unattended** (`NoConsoleScreenBufferError: No Windows console found`). It builds its questionary menus even when `config.toml` presets the answer (`trial_index`, `model_action`, ...), and on Windows prompt_toolkit needs a real console. The 3 trials had already finished. **Fix:** `scripts\heretic_headless.py` swaps the menu builders for stubs, so preset answers pass and an unset question fails with a clear message. Worth reporting upstream.
 4. **Slow restore after saving.** After the merge and save, Heretic reloads the model and redoes the trial in memory (in case you chat or benchmark next). That step sat on one CPU core with the GPU idle for over 4 minutes, so it was stopped. It only matters when saving and then chatting or benchmarking in the same run; the saved model was already complete. To look into before the big runs.
@@ -58,4 +58,16 @@ Everything lives in `%USERPROFILE%\AstraWisp`, in a normal user account with no 
 
 - **Step 1, GPU memory:** still 64 GB at the time of this report. The plan raises it as far as it goes (96 GB); see the README for both ways.
 - **Step 2, SSH and a separate "wisp" account:** skipped on Windows, because Claude runs on the box itself. The separate account comes with Ubuntu.
-- **Driver:** being updated to Adrenalin 26.11.2 after this run; re-test results to follow.
+## Re-test on the new driver
+
+Updated to AMD Software Adrenalin 26.11.2 (driver 32.0.32029.2010, release 26.20.29.02-261116a) after the run above. AMD's installer had to be run twice: the first time it unpacked its files and stopped without installing.
+
+| Check | Adrenalin 25.20 (32.0.22040.7) | Adrenalin 26.11.2 (32.0.32029.2010) |
+| --- | --- | --- |
+| PyTorch sees the GPU | yes, gfx1151, 99.7 GiB | yes, gfx1151, 99.7 GiB |
+| bf16 4096×4096 matmul ×20 | 0.193 s (about 14.3 TFLOPS) | 0.185 s (about 14.9 TFLOPS) |
+| Largest single allocation | 56 GiB | 56 GiB |
+| llama.cpp b12600 Vulkan | sees the GPU, 114,326 MiB | sees the GPU, 114,326 MiB |
+| llama.cpp b12600 ROCm | no device | no device |
+
+The ROCm build's missing device is therefore not the driver. Its Windows zip ships only some ROCm DLLs and expects the rest from a ROCm 10.0 install ([llama.cpp #26996](https://github.com/ggml-org/llama.cpp/issues/26996)). Log: `results/2026-11-20-windows-smoke-test/retest-after-driver-26.11.2.log`.

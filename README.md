@@ -29,7 +29,8 @@ Get the current AMD Software: Adrenalin Edition from AMD's page for your chip ([
 
 - AMD's ROCm 7.2.1 PyTorch release ([release notes](https://www.amd.com/en/resources/support-articles/release-notes/RN-AMDGPU-WINDOWS-PYTORCH-7-2-1.html)) asks for Adrenalin 26.2.2.
 - This box came with Adrenalin 25.20 (Dec 2025). PyTorch worked on it anyway, but llama.cpp's ROCm build found no GPU.
-- We're updating to **Adrenalin 26.11.2** (Nov 18, 2026), the current recommended driver for this chip. Re-test results on it will be added here.
+- We updated to **Adrenalin 26.11.2** (Nov 18, 2026; driver 32.0.32029.2010), the current recommended driver for this chip. PyTorch on ROCm 7.2.1 works on it with the same results (bf16 14.9 TFLOPS, against 14.3 before). llama.cpp's ROCm build still finds no GPU, so the driver wasn't the cause (problem 5).
+- In AMD's installer, click **Install** and let it finish. Our first attempt unpacked the files and stopped there, and a restart didn't help. It may also offer AMD's chipset driver; that's optional.
 - AMD's Windows ROCm has since moved to 10.2.0 with PyTorch 2.15.0, which pairs with 26.11.2 ([install page](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=ryzen&gpu=amd-ryzen-ai-max-395&os=windows&gfx=gfx1151)). This guide stays on ROCm 7.2.1 / PyTorch 2.9.1 so the Windows and Ubuntu runs match.
 
 ### 2. Give the GPU more memory
@@ -75,18 +76,20 @@ The full package list is in [`results/2026-11-20-windows-smoke-test/pip-freeze.t
 & "$env:USERPROFILE\AstraWisp\venv\Scripts\python.exe" scripts\check_gpu.py
 ```
 
-On this box, at the 64/64 split and on the old driver:
+On this box, at the 64/64 split, on Adrenalin 26.11.2:
 
 ```
 torch 2.9.1+rocm7.2.1 hip 7.2.53211-158bd99533
 gpu available: True
 device 0: AMD Radeon(TM) 8060S Graphics  arch=gfx1151  total_memory=99.7 GiB
 mem_get_info: free=99.6 GiB  total=99.7 GiB
-bf16 4096x4096 matmul x20: 0.193 s  (~14.3 TFLOPS)
+bf16 4096x4096 matmul x20: 0.185 s  (~14.9 TFLOPS)
 largest single allocation that worked: 56 GiB
 ```
 
-llama.cpp: `llama-cli --list-devices` in the Vulkan build lists `Vulkan0: AMD Radeon(TM) 8060S Graphics (114326 MiB, 108610 MiB free)`. The ROCm build lists `(none)`, likely because the driver was older than ROCm 10 needs and because the Windows ROCm zip doesn't ship every ROCm DLL it needs ([llama.cpp #26996](https://github.com/ggml-org/llama.cpp/issues/26996)).
+On the old Adrenalin 25.20 driver it was the same apart from speed (0.193 s, about 14.3 TFLOPS).
+
+llama.cpp: `llama-cli --list-devices` in the Vulkan build lists `Vulkan0: AMD Radeon(TM) 8060S Graphics (114326 MiB, 108610 MiB free)` on both drivers. The ROCm build lists `(none)` on both (problem 5).
 
 ### 5. Smoke test: 3 Heretic trials on a small model
 
@@ -119,9 +122,10 @@ Every trial's parameters and scores are in [`results/2026-11-20-windows-smoke-te
 ## Problems we hit, and the fixes
 
 1. **Python's normal installer failed.** The python.org 3.12.10 installer (per-user, quiet) exited with code 3, MSI error `0x80070003`, "path not found" opening its cached `core.msi`. It most likely came from the sandboxed shell it was launched from. **Fix:** Python's official NuGet package, which is a plain folder and needs no installer.
-2. **The driver was older than AMD asks for.** See step 2.
+2. **The driver was older than AMD asks for.** It worked anyway; we updated it in step 1.
 3. **Heretic crashes at its menus when no console is attached** (`NoConsoleScreenBufferError: No Windows console found`), for example when its output goes to a log file. Heretic 2.1.0 builds each questionary menu even when `config.toml` already holds the answer (`trial_index`, `model_action`, `export_strategy`, ...), and on Windows prompt_toolkit needs a real console to build one. The trials had already finished; the crash was at "Which trial do you want to use?". **Fix:** [`scripts/heretic_headless.py`](scripts/heretic_headless.py) swaps the menu builders for stubs, so preset answers go straight through and an unset question stops with a clear message.
 4. **Slow step after saving.** After merging and saving, Heretic reloads the model and rebuilds the trial in memory, in case you want to chat with it or benchmark it next. On this box that rebuild sat on one CPU core with the GPU idle for over 4 minutes, so we stopped it. The saved model was already complete. It only matters if you save and then keep using the model in the same run. Still to look into.
+5. **llama.cpp's Windows ROCm build lists no GPU** (`Available devices: (none)`), on both the old and the new driver. Its zip ships only some ROCm runtime DLLs and expects the rest (hipBLAS, rocBLAS and their kernels) from a matching ROCm 10.0 install on `PATH`. Others report the same thing and a fix of adding those DLLs ([llama.cpp #26996](https://github.com/ggml-org/llama.cpp/issues/26996)). Not fixed here yet; the Vulkan build works meanwhile.
 
 ## What's in this repo
 

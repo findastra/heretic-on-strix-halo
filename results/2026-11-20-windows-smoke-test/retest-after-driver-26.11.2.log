@@ -1,0 +1,22 @@
+﻿== 2026-11-20 22:54
+GPU: AMD Radeon(TM) 8060S Graphics  driver 32.0.32029.2010  date 11/17/2026 16:00:00
+Adrenalin: 26.11.2  release 26.20.29.02-261116a-206168C-AMD-Software-Adrenalin-Edition
+Dedicated GPU memory (GB): 64
+RAM visible to Windows (GB): 63.6
+
+== PyTorch
+python 3.12.10 Windows-11-10.0.26300-SP0
+torch 2.9.1+rocm7.2.1 hip 7.2.53211-158bd99533
+gpu available: True
+device 0: AMD Radeon(TM) 8060S Graphics  arch=gfx1151  total_memory=99.7 GiB
+mem_get_info: free=99.6 GiB  total=99.7 GiB
+bf16 4096x4096 matmul x20: 0.185 s  (~14.9 TFLOPS)
+largest single allocation that worked: 56 GiB
+
+== llama.cpp b12600 vulkan
+Available devices:
+  Vulkan0: AMD Radeon(TM) 8060S Graphics (114326 MiB, 108610 MiB free)
+
+== llama.cpp b12600 rocm
+Available devices:
+  (none)
