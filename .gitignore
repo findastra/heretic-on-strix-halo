@@ -1,0 +1,16 @@
+# Model weights never go in this repo (they stay private on the box).
+models/
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+
+# Local environments, caches and downloads
+venv/
+.venv/
+python312/
+hf-cache/
+downloads/
+checkpoints/
+__pycache__/

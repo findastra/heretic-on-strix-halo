@@ -1,0 +1,23 @@
+﻿# Phase A smoke test (plan step 5): Heretic 2.1.0 runs 3 trials on a small model.
+# Every interactive question is answered here so the run is unattended.
+
+model = "Qwen/Qwen2.5-0.5B-Instruct"
+
+n_trials = 3
+n_startup_trials = 3
+seed = 42
+
+# 4-bit loading stays off (bitsandbytes is shaky on AMD; the plan skips it).
+quantization = "none"
+
+# AMD: "On Windows, only LLM batch sizes of 1 are officially supported."
+# Auto batch sizing is tried first, capped, so the report shows whether larger batches work.
+batch_size = 0
+max_batch_size = 32
+
+# Answers to the prompts Heretic would otherwise ask.
+checkpoint_action = "restart"
+trial_index = 0
+model_action = "save"
+export_strategy = "merge"
+save_directory = "models/smoke-test-qwen2.5-0.5b"  # relative to the folder you run Heretic from

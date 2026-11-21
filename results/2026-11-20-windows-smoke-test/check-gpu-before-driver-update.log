@@ -1,0 +1,7 @@
+﻿python 3.12.10 Windows-11-10.0.26300-SP0
+torch 2.9.1+rocm7.2.1 hip 7.2.53211-158bd99533
+gpu available: True
+device 0: AMD Radeon(TM) 8060S Graphics  arch=gfx1151  total_memory=99.7 GiB
+mem_get_info: free=99.6 GiB  total=99.7 GiB
+bf16 4096x4096 matmul x20: 0.193 s  (~14.3 TFLOPS)
+largest single allocation that worked: 56 GiB
