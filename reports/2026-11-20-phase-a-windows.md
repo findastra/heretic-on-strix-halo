@@ -62,6 +62,8 @@ Everything lives in `%USERPROFILE%\AstraWisp`, in a normal user account with no 
 
 Updated to AMD Software Adrenalin 26.11.2 (driver 32.0.32029.2010, release 26.20.29.02-261116a) after the run above. AMD's installer had to be run twice: the first time it unpacked its files and stopped without installing.
 
+After the install the HDMI monitor (Dell U3225QE, 4K) went black. Windows still showed it as connected and active, sending 3840×2160 at 59 Hz over HDMI, and the System log had no display-driver errors or resets. A restart of the box brought the picture back. After the restart the driver, display mode and PyTorch GPU check were all unchanged.
+
 | Check | Adrenalin 25.20 (32.0.22040.7) | Adrenalin 26.11.2 (32.0.32029.2010) |
 | --- | --- | --- |
 | PyTorch sees the GPU | yes, gfx1151, 99.7 GiB | yes, gfx1151, 99.7 GiB |

@@ -31,6 +31,7 @@ Get the current AMD Software: Adrenalin Edition from AMD's page for your chip ([
 - This box came with Adrenalin 25.20 (Dec 2025). PyTorch worked on it anyway, but llama.cpp's ROCm build found no GPU.
 - We updated to **Adrenalin 26.11.2** (Nov 18, 2026; driver 32.0.32029.2010), the current recommended driver for this chip. PyTorch on ROCm 7.2.1 works on it with the same results (bf16 14.9 TFLOPS, against 14.3 before). llama.cpp's ROCm build still finds no GPU, so the driver wasn't the cause (problem 5).
 - In AMD's installer, click **Install** and let it finish. Our first attempt unpacked the files and stopped there, and a restart didn't help. It may also offer AMD's chipset driver; that's optional.
+- **Restart when it's done**, even if it doesn't ask. After our install, the HDMI monitor (a 4K Dell) stayed black. Windows still listed the monitor as connected and was sending it 3840×2160 at 59 Hz, and the logs showed no driver errors. A restart brought the picture back. If you can't see the screen, you can still sign in blind: press a key, type your PIN, press Enter.
 - AMD's Windows ROCm has since moved to 10.2.0 with PyTorch 2.15.0, which pairs with 26.11.2 ([install page](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=ryzen&gpu=amd-ryzen-ai-max-395&os=windows&gfx=gfx1151)). This guide stays on ROCm 7.2.1 / PyTorch 2.9.1 so the Windows and Ubuntu runs match.
 
 ### 2. Give the GPU more memory
